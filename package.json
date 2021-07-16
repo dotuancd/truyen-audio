@@ -1,0 +1,18 @@
+{
+    "description": "Doc truyen bang audio",
+    "dependencies": {
+        "dotenv": "10.0.0",
+        "microsoft-cognitiveservices-speech-sdk": "1.17.0",
+        "cheerio": "1.0.0-rc.10",
+        "axios": "0.21.1"
+    },
+    "scripts": {
+        "now": "ts-node index.ts",
+        "ts-node": "ts-node --"
+    },
+    "devDependencies": {
+        "typescript": "4.3.5",
+        "@types/node": "^16.3.2",
+        "ts-node": "^10.1.0"
+    }
+}
