@@ -27,7 +27,13 @@ export class Voice {
 }
 
 export class Ssml {
-    voices: Voice[] = [];
+    voices: Voice[];
+    lang: string = 'vi-VN';
+
+    constructor(...voices: Voice[]) {
+        this.lang = this.lang;
+        this.voices = voices;
+    }
 
     get length() {
         return this.voices.map(voice => voice.length).reduce((sum, size) => sum + size, 0);
@@ -38,19 +44,23 @@ export class Ssml {
     }
 
     chunk(size: number): Ssml[] {
-
+        // Chunk voice if needs
         let voices = this.voices.flatMap(voice => voice.chunk(size));
-        console.log({before: this.voices.length, after: voices.length});
 
-        let chunks = [new Ssml];
+        let chunks = [new Ssml()];
         voices.forEach((voice) => {
             let last = chunks[chunks.length - 1];
-            if (last.length + voice.length <= size) {
+
+            if (last.voices.length == 50) {
+                last = new Ssml;
+                chunks.push(last);
+            }
+
+            // Uses last node if it empty to prevent add empty not at beginning in case first voice has size > chunk size.
+            if (last.length == 0 || last.length + voice.length <= size) {
                 last.voice(voice);
             } else {
-                last = new Ssml;
-                last.voice(voice);
-                chunks.push(last);
+                chunks.push(new Ssml(voice));
             }
         })
 
@@ -58,6 +68,8 @@ export class Ssml {
     }
 
     toString() {
-        return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="vi-VN">${this.voices.join("\n")}</speak>`
+        return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${this.lang}">
+        ${this.voices.join("\n")}
+        </speak>`
     }
 }

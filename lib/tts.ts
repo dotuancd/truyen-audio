@@ -1,24 +1,13 @@
 import { timeStamp } from "console";
 import { writeFileSync } from "fs";
 import { AudioConfig, PushAudioOutputStreamCallback, SpeechConfig, SpeechSynthesizer } from "microsoft-cognitiveservices-speech-sdk";
+import { Ssml, Voice as SsmlVoice } from "./ssml";
 import { Str } from "./str";
 import { Wav } from "./wav";
 
 export enum Voice {
     HoaiMy = "vi-VN-HoaiMyNeural",
     NamMinh = "vi-VN-NamMinhNeural"
-}
-
-class Ssml {
-    voices: string[];
-    
-    voice(content: string, voice: Voice) {
-        this.voices.push(`<voice name="${voice}">${content}</voice>`);
-    }
-
-    toString() {
-        `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="vi-VN">${this.voices.join("")}</speak>`;
-    }
 }
 
 class NullAudioOutputStream extends PushAudioOutputStreamCallback
@@ -34,24 +23,20 @@ export class Tts
 {
     speechConfig: SpeechConfig;
 
+    readonly CHUNK_SIZE: number = 8000;
+
     constructor(speechConfig: SpeechConfig) {
         this.speechConfig = speechConfig;
     }
 
-    async withAudioConfig(content: string, voice: Voice, audioConfig: AudioConfig): Promise<Buffer> {
+    private async _speakSsml(ssml: Ssml): Promise<Buffer> {
+        const stream = new NullAudioOutputStream();
+        const audioConfig = AudioConfig.fromStreamOutput(stream);
         const synthesizer = new SpeechSynthesizer(this.speechConfig, audioConfig);
-
-        const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="vi-VN">
-    <voice name="${voice}">
-        <prosody pitch="-5.00%">
-        ${content}
-        </prosody>
-    </voice>
-    </speak>`;
 
         return new Promise((resolve, reject) => {
             synthesizer.speakSsmlAsync(
-                ssml,
+                ssml.toString(),
                 result => {
                     if (result) {
                         console.log(JSON.stringify(result));
@@ -69,20 +54,23 @@ export class Tts
         });
     }
 
-    async speak(content: string, voice: Voice) {
-        const stream = new NullAudioOutputStream();
-
-        const audioConfig = AudioConfig.fromStreamOutput(stream);
-        return this.withAudioConfig(content, voice, audioConfig);
+    async speakSsml(content: Ssml) {
+        return this.join(...content.chunk(this.CHUNK_SIZE));
     }
 
-    async speakConcat(content: string, voice: Voice, chunkSize = 8000) {
-        let sessions = Str.chunk(content, chunkSize).map(speech => {
-            console.log(`[INFO] Converting ${speech.length} characters.`);
-            return this.speak(speech, voice)
+    async speak(content: string, voice: Voice) {
+        return this.speakSsml(new Ssml(new SsmlVoice(voice, content)));
+    }
+
+    async join(...chunks: Ssml[]) {
+
+        let jobs = chunks.map(async chunk => {
+            console.log(`[INFO] Converting ${chunk.length} characters.`);
+            return await this._speakSsml(chunk)
         });
 
-        let parts = await Promise.all(sessions);
+        let parts = await Promise.all(jobs);
+
         let audio = parts.reduce((result, current) => {
             return Wav.join(result, current);
         });

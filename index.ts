@@ -6,6 +6,7 @@ import { Logger } from './lib/logger';
 import { Tts, Voice } from './lib/tts';
 import { SpeechConfig } from 'microsoft-cognitiveservices-speech-sdk';
 import { Storage } from './lib/storage';
+import { Autoturn } from './lib/auto_turn';
 
 const config = dotenv.config().parsed;
 
@@ -15,6 +16,7 @@ const config = dotenv.config().parsed;
     const downloader: Downloader = new TruyenFull('https://truyenfull.vn/the-gioi-hoan-my');
     const copyright = Copyright.default();
     const storage = new Storage("output/the-gioi-hoan-my", "chuong-");
+    const autoturner = new Autoturn(Voice.NamMinh, Voice.HoaiMy);
 
     const processChapter = async (chapter: number, condition: (chapter: number) => boolean) => {
         Logger.info(`Downloading chapter ${chapter}`);
@@ -29,7 +31,9 @@ const config = dotenv.config().parsed;
 
         // Run text to speech & save it to output directory
         Logger.info(`Converting text to speech`);
-        let audio = await tts.speakConcat(content, Voice.NamMinh);
+        let ssml = autoturner.makeup(content);
+        let audio = await tts.speakSsml(ssml);
+        // let audio = await tts.speakConcat(content, Voice.NamMinh);
         let savedTo = storage.save(chapter, audio);
 
         Logger.info(`Saved to: ${savedTo}`);
@@ -40,5 +44,5 @@ const config = dotenv.config().parsed;
     }
 
 
-    processChapter(116, i => i < 130);
+    processChapter(116, i => i < 116);
 })()
