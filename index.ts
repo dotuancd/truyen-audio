@@ -32,18 +32,17 @@ const config = dotenv.config().parsed;
         Logger.info(`Downloading chapter ${chapter}`);
 
         // Download content
-        let content = await downloader.download(chapter);
+        let chapterInfo = await downloader.download(chapter);
 
         // Adding copy right
-        content = copyright.addTo(content);
-
-        console.log(content);
+        let content = copyright.addTo(chapterInfo.content);
 
         // Run text to speech & save it to output directory
         Logger.info(`Converting text to speech - Chapter ${chapter}`);
         let ssml = autoturner.makeup(content);
         storage.saveSsml(chapter, ssml.toString());
         storage.saveText(chapter, content);
+        storage.saveAsJson(chapterInfo);
 
         let audio = await tts.speakSsml(ssml);
         let savedTo = storage.saveAudio(chapter, audio);
@@ -55,5 +54,5 @@ const config = dotenv.config().parsed;
         }
     }
 
-    processChapter(413, i => i < 420);
+    processChapter(413, i => i < 414);
 })()

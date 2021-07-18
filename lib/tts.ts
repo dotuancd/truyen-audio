@@ -8,7 +8,8 @@ import { Wav } from "./wav";
 
 export enum Voice {
     HoaiMy = "vi-VN-HoaiMyNeural",
-    NamMinh = "vi-VN-NamMinhNeural"
+    NamMinh = "vi-VN-NamMinhNeural",
+    An = "vi-VN-An",
 }
 
 class NullAudioOutputStream extends PushAudioOutputStreamCallback

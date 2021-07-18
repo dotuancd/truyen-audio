@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import path from "path/posix";
-import { Chapter } from "./download";
+import { Chapter, ChapterInfo } from "./download";
 
 
 export interface StorageOption {
@@ -13,6 +13,7 @@ export interface StorageOption {
 
 export enum FileType {
     text = "text",
+    json = "json",
     audio = "audio",
     ssml = "ssml"
 }
@@ -20,7 +21,8 @@ export enum FileType {
 export const Extentions: Record<FileType, string> = {
     [FileType.audio]: "wav",
     [FileType.text]: "txt",
-    [FileType.ssml]: "ssml.txt"
+    [FileType.ssml]: "ssml.txt",
+    [FileType.json]: "json",
 }
 
 export interface FilenameResolver {
@@ -76,6 +78,10 @@ export class Storage {
 
     saveSsml(chapter: Chapter, data: Buffer | string) {
         return this.write(chapter, data, FileType.ssml);
+    }
+
+    saveAsJson(info: ChapterInfo) {
+        return this.write(info.chapterNo, JSON.stringify(info, null, 4), FileType.json);
     }
 
     private write(chapter: Chapter, data: Buffer | string, type: FileType): string {
