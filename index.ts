@@ -45,15 +45,15 @@ const config = dotenv.config().parsed;
         storage.saveSsml(chapter, ssml.toString());
         storage.saveText(chapter, content);
 
-        // let audio = await tts.speakSsml(ssml);
-        // let savedTo = storage.saveAudio(chapter, audio);
+        let audio = await tts.speakSsml(ssml);
+        let savedTo = storage.saveAudio(chapter, audio);
 
-        // Logger.info(`Saved to: ${savedTo}`);
+        Logger.info(`Saved to: ${savedTo}`);
 
         if (condition(chapter)) {
             processChapter(chapter + 1, condition);
         }
     }
 
-    processChapter(413, i => false && i < 420);
+    processChapter(413, i => i < 420);
 })()
