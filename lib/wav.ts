@@ -1,3 +1,9 @@
+
+export class WavInfo {
+    duration: number
+    dataSize: number
+}
+
 export class Wav {
     static join(first: Buffer, second: Buffer): Buffer {
         let firstSize = first.readUInt32LE(40);

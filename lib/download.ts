@@ -8,6 +8,11 @@ export interface Downloader {
 
 export type Chapter = string | number;
 
+export interface ChapterInfo {
+    title: string
+    chapter: number
+}
+
 export class TruyenFull implements Downloader {
 
     novel: string;
@@ -47,6 +52,8 @@ export class TruyenFull implements Downloader {
         siteIdentifiers.forEach(search => {
             content = content.replaceAll(search, '');
         })
+
+        content = content.replaceAll('&', ' và ');
 
         let title = 'Bộ truyện: ' + $html('a.truyen-title').text();
         let chapterTitle = $html('a.chapter-title').text();

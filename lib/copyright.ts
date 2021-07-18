@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+
 export class Copyright
 {
     copyright: string;
@@ -16,12 +18,7 @@ export class Copyright
         return [...parts.slice(0, position), this.copyright, ...parts.slice(position)].join("\n");
     }
 
-    static default() {
-
-        const copyright = `Bạn đang nghe truyện tại Truyện Trung Quốc.
-Truyện Trung Quốc có trên các nền tảng Spotify, Apple Podcasts, Google Podcasts.
-Chúc các bạn nghe truyện vui vẻ. `;
-
-        return new Copyright(copyright);
+    static loadFromFile(path: string) {
+        return new Copyright(readFileSync(path).toString("utf8"));
     }
 }

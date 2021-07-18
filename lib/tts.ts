@@ -1,6 +1,7 @@
 import { timeStamp } from "console";
 import { writeFileSync } from "fs";
 import { AudioConfig, PushAudioOutputStreamCallback, SpeechConfig, SpeechSynthesizer } from "microsoft-cognitiveservices-speech-sdk";
+import { sequential } from "./async";
 import { Ssml, Voice as SsmlVoice } from "./ssml";
 import { Str } from "./str";
 import { Wav } from "./wav";
@@ -19,7 +20,54 @@ class NullAudioOutputStream extends PushAudioOutputStreamCallback
     }
 }
 
-export class Tts
+export interface TtsService {
+    speakSsml(content: Ssml): Promise<Buffer>
+    speak(content: string, voice: Voice): Promise<Buffer>
+}
+
+export class TtsPool implements TtsService {
+    readonly CHUNK_SIZE: number = 8000;
+
+    protected pool: TtsService[];
+
+    protected used: number[] = [];
+
+    constructor(...pool: TtsService[]) {
+        this.pool = pool;
+        this.used = pool.map(_ => 0);
+    }
+
+    async speakSsml(content: Ssml): Promise<Buffer> {
+        let chunks = content.chunk(this.CHUNK_SIZE);
+
+        let parts = await Promise.all(chunks.map(async (chunk) => {
+            return this.resolveService().speakSsml(chunk);
+        }));
+        
+        let audio = parts.reduce((result, current) => {
+            return Wav.join(result, current);
+        });
+
+        return audio;
+    }
+
+    private resolveService(): TtsService {
+        let max = this.used.reduce((max, current) => max < current ? current : max);
+        let found = this.used.find((usage) => usage < max);
+        if (found === undefined) {
+            found = 0;
+        }
+
+        this.used[found]++;
+        return this.pool[found];
+    }
+
+    speak(content: string, voice: Voice): Promise<Buffer> {
+        return this.speakSsml(new Ssml(new SsmlVoice(voice, content)));
+    }
+}
+
+export class Tts implements TtsService
 {
     speechConfig: SpeechConfig;
 
@@ -54,45 +102,30 @@ export class Tts
         });
     }
 
-    async speakSsml(content: Ssml) {
+    async speakSsml(content: Ssml): Promise<Buffer> {
         return this.join(...content.chunk(this.CHUNK_SIZE));
     }
 
-    async speak(content: string, voice: Voice) {
+    async speak(content: string, voice: Voice): Promise<Buffer> {
         return this.speakSsml(new Ssml(new SsmlVoice(voice, content)));
     }
 
-    async join(...chunks: Ssml[]) {
+    private async join(...chunks: Ssml[]): Promise<Buffer> {
 
-        let jobs = chunks.map(async chunk => {
+        // let jobs = chunks.map(async chunk => {
+        //     console.log(`[INFO] Converting ${chunk.length} characters.`);
+        //     return await this._speakSsml(chunk)
+        // });
+
+        let parts = await sequential(chunks, async (chunk) => {
             console.log(`[INFO] Converting ${chunk.length} characters.`);
-            return await this._speakSsml(chunk)
+            return await this._speakSsml(chunk);
         });
-
-        let parts = await Promise.all(jobs);
 
         let audio = parts.reduce((result, current) => {
             return Wav.join(result, current);
         });
 
         return audio;
-    }
-
-    async saveTo(content: string, voice: Voice, target: string): Promise<string> {
-
-        let sessions = Str.chunk(content, 8000).map(speech => {
-            console.log(`[INFO] Converting ${speech.length} characters.`);
-            return this.speak(speech, voice)
-        });
-
-        let parts = await Promise.all(sessions);
-
-        let audio = parts.reduce((result, current) => {
-            return Wav.join(result, current);
-        })
-
-        writeFileSync(target, audio);
-
-        return target;
     }
 }
