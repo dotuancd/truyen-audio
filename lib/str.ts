@@ -21,7 +21,7 @@ export class Str
                 return rs;
             }
 
-            let stop = content.lastIndexOf(stopChar);
+            let stop = content.lastIndexOf(stopChar, size);
             let chunk = content.substring(0, stop + 1);
             content = content.substring(stop + 1);
             rs.push(chunk);

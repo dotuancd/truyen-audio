@@ -1,5 +1,4 @@
-import { Ssml, Voice as SsmlVoice } from "./ssml";
-import { Voice } from "./tts";
+import { Ssml, Voice, VoiceNode as SsmlVoice } from "./ssml";
 
 export class Autoturn {
 
@@ -21,6 +20,11 @@ export class Autoturn {
             if (openPos === -1 || closePos === -1) {
                 result.voice(new SsmlVoice(this.normalVoice, content.trim()));
                 return result;
+            }
+
+            // Avoid . at the end after quote
+            if (content[closePos + 1] == '.') {
+                closePos++;
             }
 
             let normal = content.substr(0, openPos);

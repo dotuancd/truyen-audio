@@ -1,36 +1,42 @@
 import { Str } from "./str";
 
-export class Voice {
+export interface Voice {
+    name: string
+}
+
+export class VoiceNode {
     content: string;
-    voice: string;
+    voice: Voice;
 
     get length() {
         return this.content.length;
     }
 
-    constructor(voice: string, content: string) {
+    constructor(voice: Voice, content: string) {
         this.voice = voice;
         this.content = content;
     }
 
     toString() {
-        return `<voice name="${this.voice}">${this.content}</voice>`;
+        return `<voice name="${this.voice.name}">${this.content}</voice>`;
     }
 
-    chunk(size: number): Voice[] {
+    chunk(size: number): VoiceNode[] {
         if (this.length <= size) {
-            return [new Voice(this.voice, this.content)];
+            return [new VoiceNode(this.voice, this.content)];
         }
 
-        return Str.chunk(this.content, size).map(chunk => new Voice(this.voice, chunk))
+        return Str.chunk(this.content, size).map(chunk => new VoiceNode(this.voice, chunk))
     }
 }
 
+export const NoLimitVoiceNodes = -1;
+
 export class Ssml {
-    voices: Voice[];
+    voices: VoiceNode[];
     lang: string = 'vi-VN';
 
-    constructor(...voices: Voice[]) {
+    constructor(...voices: VoiceNode[]) {
         this.lang = this.lang;
         this.voices = voices;
     }
@@ -39,19 +45,19 @@ export class Ssml {
         return this.voices.map(voice => voice.length).reduce((sum, size) => sum + size, 0);
     }
 
-    voice(voice: Voice) {
+    voice(voice: VoiceNode) {
         this.voices.push(voice);
     }
 
-    chunk(size: number): Ssml[] {
+    chunk(size: number, maxVoiceNodes = NoLimitVoiceNodes): Ssml[] {
         // Chunk voice if needs
         let voices = this.voices.flatMap(voice => voice.chunk(size));
-
+        
         let chunks = [new Ssml()];
         voices.forEach((voice) => {
             let last = chunks[chunks.length - 1];
 
-            if (last.voices.length == 50) {
+            if (maxVoiceNodes !== NoLimitVoiceNodes && last.voices.length == maxVoiceNodes) {
                 last = new Ssml;
                 chunks.push(last);
             }

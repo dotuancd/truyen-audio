@@ -18,6 +18,20 @@ export class Copyright
         return [...parts.slice(0, position), this.copyright, ...parts.slice(position)].join("\n");
     }
 
+    placement(replacements: object) {
+        let content = Object.keys(replacements).reduce((content, search) => {
+            return content.replaceAll('{' + search + '}', replacements[search]);
+        }, this.copyright);
+
+        return new Copyright(content);
+    }
+
+    addAsOutroOf(content: string): string {
+        return `${content}.
+
+${this.copyright}`;
+    }
+
     static loadFromFile(path: string) {
         return new Copyright(readFileSync(path).toString("utf8"));
     }
