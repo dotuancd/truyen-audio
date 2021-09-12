@@ -3,16 +3,25 @@ import { Downloader, TruyenFull } from './lib/download';
 import { Copyright } from './lib/copyright';
 import { Logger } from './lib/logger';
 import { TtsPool} from './lib/tts';
-import { DefaultFilenameResolver, PrefixFilenameResolver, Storage } from './lib/storage';
+import { ExtensionsFilenameResolver, FileType, PrefixFilenameResolver, Storage } from './lib/storage';
 import { Autoturn } from './lib/auto_turn';
 import { GoogleTts, GVoices } from './lib/tts-services/gg-tts';
 import { MsTts, MsVoices } from './lib/tts-services/ms-tts';
+import { HnManhDungDocBao, HnNgocHuyen, VbeeTts } from './lib/tts-services/vbee-tts';
+import { RandomProxyRotation } from './lib/proxy_rotation';
+import { BuyProxies } from './lib/proxy-services/buyproxies';
+import { NamHN, NuHN, ZaloTts } from './lib/tts-services/zalo';
 
 const config = dotenv.config().parsed;
 
 (async () => {
 
+    // let buyProxies = new BuyProxies(config.BUY_PROXIES_PID, config.BUY_PROXIES_KEY);
+    // let proxies = await buyProxies.proxies();
     let tts = MsTts.factory(config.MS_TTS_KEY, config.MS_TTS_REGION);
+    // let tts = new VbeeTts(new RandomProxyRotation(proxies));
+    // let tts = new ZaloTts(config.ZALO_KEY);
+
     // let tts = new TtsPool(
     //     GoogleTts.factory(),
     //     GoogleTts.factory(),
@@ -24,14 +33,18 @@ const config = dotenv.config().parsed;
     // const downloader: Downloader = new TruyenFull('https://truyenfull.vn/the-gioi-hoan-my');
     const downloader: Downloader = new TruyenFull('https://truyenfull.vn/dau-la-dai-luc-230420');
     const copyright = Copyright.loadFromFile('copyright.txt');
-    const autoturn = new Autoturn(MsVoices.NamMinh, MsVoices.HoaiMy);
+    const autoturn = new Autoturn(NuHN, NamHN);
+    // const autoturn = new Autoturn(HnNgocHuyen, HnManhDungDocBao);
     // const autoturner = new Autoturn(GVoices.WavenetA, GVoices.WavenetD);
     const outro = Copyright.loadFromFile('outro.txt');
 
-    const storage = new Storage(
-        "output/dau-la-dai-luc",
-        new PrefixFilenameResolver("dldl-chuong-", DefaultFilenameResolver)
+    let filenameResolver = new PrefixFilenameResolver(
+        "dldl-chuong-",
+        ExtensionsFilenameResolver.default(tts.audioProcessor)
     );
+        
+    const storage = new Storage("output/dau-la-dai-luc", filenameResolver);
+
     const processChapter = async (chapter: number, condition: (chapter: number) => boolean) => {
         Logger.info(`Downloading chapter ${chapter}`);
 
@@ -60,5 +73,5 @@ const config = dotenv.config().parsed;
         }
     }
 
-    processChapter(419, i => i < 419);
+    processChapter(421, i => i < 421);
 })()

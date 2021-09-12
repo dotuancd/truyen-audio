@@ -1,7 +1,7 @@
 import { Str } from "./str";
 
 export interface Voice {
-    name: string
+    code: string
 }
 
 export class VoiceNode {
@@ -18,7 +18,7 @@ export class VoiceNode {
     }
 
     toString() {
-        return `<voice name="${this.voice.name}">${this.content}</voice>`;
+        return `<voice name="${this.voice.code}">${this.content}</voice>`;
     }
 
     chunk(size: number): VoiceNode[] {

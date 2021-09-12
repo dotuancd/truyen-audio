@@ -1,5 +1,6 @@
 export class Logger {
-    static info(message: string) {
-        console.info(`[INFO] ${message}`);
+    static info(message: any) {
+        let formatted = typeof message == 'object' ? JSON.stringify(message) : message;
+        console.info(`[INFO] ${formatted}`);
     }
 }

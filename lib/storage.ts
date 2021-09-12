@@ -1,6 +1,8 @@
+import { timeStamp } from "console";
 import { writeFileSync } from "fs";
 import path from "path/posix";
 import { Chapter, ChapterInfo } from "./download";
+import { AudioProcessor } from "./tts";
 
 
 export interface StorageOption {
@@ -27,6 +29,41 @@ export const Extentions: Record<FileType, string> = {
 
 export interface FilenameResolver {
     resolve(chapter: Chapter, type: FileType): string
+}
+
+export class CallbackFilenameResolver implements FilenameResolver {
+    callback: (chapter: Chapter, type: FileType) => string;
+
+    constructor(callback: (chapter: Chapter, type: FileType) => string) {
+        this.callback = callback;
+    }
+
+    resolve(chapter: Chapter, type: FileType): string {
+        return this.callback(chapter, type);
+    }
+}
+
+export class ExtensionsFilenameResolver implements FilenameResolver {
+
+    extensions: {};
+
+    constructor(extensions = {}) {
+        this.extensions = extensions;    
+    }
+
+    set(type: FileType, extension: string) {
+        this.extensions[type] = extension;
+
+        return this;
+    }
+
+    resolve(chapter: Chapter, type: FileType): string {
+        return `${chapter}` + ( this.extensions[type] ? '.'+ this.extensions[type] : '');
+    }
+
+    static default(audioProcessor: AudioProcessor): ExtensionsFilenameResolver {
+        return new ExtensionsFilenameResolver(Extentions).set(FileType.audio, audioProcessor.extension);
+    }
 }
 
 export const DefaultFilenameResolver: FilenameResolver = {

@@ -1,21 +1,21 @@
 import { v1beta1 } from "@google-cloud/text-to-speech";
 import { Ssml, Voice } from "../ssml";
-import { ChunkTts } from "../tts";
+import { ChunkTts, WavProcessor } from "../tts";
 
 const StandardA: Voice = {
-    name: "vi-VN-Standard-A"
+    code: "vi-VN-Standard-A"
 }
 
 const StandardD: Voice = {
-    name: "vi-VN-Standard-D"
+    code: "vi-VN-Standard-D"
 }
 
 const WavenetA: Voice = {
-    name: "vi-VN-Wavenet-A"
+    code: "vi-VN-Wavenet-A"
 }
 
 const WavenetD: Voice = {
-    name: "vi-VN-Wavenet-D"
+    code: "vi-VN-Wavenet-D"
 }
 
 export const GVoices = {
@@ -34,7 +34,7 @@ export class GoogleTts extends ChunkTts {
     readonly CHUNK_SIZE: number = 4000;
 
     constructor(client: TextToSpeechClient) {
-        super();
+        super(new WavProcessor);
         this.client = client;
     }
 

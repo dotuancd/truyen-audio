@@ -1,17 +1,17 @@
 import { AudioConfig, PushAudioOutputStreamCallback, SpeechConfig, SpeechSynthesizer } from "microsoft-cognitiveservices-speech-sdk";
 import { Ssml, Voice } from "../ssml";
-import { ChunkTts, LimitedByVoiceNodes } from "../tts";
+import { ChunkTts, LimitedByVoiceNodes, WavProcessor } from "../tts";
 
 const HoaiMy: Voice = {
-    name: "vi-VN-HoaiMyNeural"
+    code: "vi-VN-HoaiMyNeural"
 }
 
 const NamMinh: Voice = {
-    name: "vi-VN-NamMinhNeural"
+    code: "vi-VN-NamMinhNeural"
 }
 
 const An: Voice = {
-    name: "vi-VN-An"
+    code: "vi-VN-An"
 }
 
 export const MsVoices = {
@@ -41,7 +41,7 @@ export class MsTts extends ChunkTts implements LimitedByVoiceNodes {
     readonly CHUNK_SIZE: number = 8000;
 
     constructor(speechConfig: SpeechConfig) {
-        super();
+        super(new WavProcessor);
         this.speechConfig = speechConfig;
     }
 

@@ -5,6 +5,22 @@ export class Str
         return this.chunkBy(content, size);
     }
 
+    static  trim(input: string, chars: string[]) {
+        chars.forEach((c) => {
+            while (input.startsWith(c) || input.endsWith(c)) {
+                if (input.startsWith(c)) {
+                    input = input.substring(1)
+                }
+
+                if (input.endsWith(c)) {
+                    input = input.substring(0, input.length - 1)
+                }
+            }
+        });
+
+        return input;
+    }
+
     static chunkBy(content: string, size: number, stopChars = ['.', ',']) {
         let rs = [];
 

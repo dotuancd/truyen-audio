@@ -5,6 +5,7 @@ import { Wav } from "./wav";
 export interface TtsService {
     speakSsml(content: Ssml): Promise<Buffer>
     speak(content: string, voice: Voice): Promise<Buffer>
+    audioProcessor: AudioProcessor
 }
 
 export interface LimitedByVoiceNodes {
@@ -15,9 +16,39 @@ function hasVoiceNodesLimitation(tts: any): tts is LimitedByVoiceNodes {
     return 'maxVoiceNodesAllowed' in tts;
 }
 
+
+export interface AudioProcessor {
+    join(first: Buffer, second: Buffer): Buffer
+
+    extension: string
+}
+
+export class WavProcessor implements AudioProcessor {
+    extension = 'wav';
+
+    join(first: Buffer, second: Buffer): Buffer {
+        return Wav.join(first, second);
+    }
+}
+
+export class Mp3Processor implements AudioProcessor {
+
+    extension = 'mp3';
+
+    join(first: Buffer, second: Buffer): Buffer {
+        return Buffer.concat([first, second]);
+    }
+}
+
 export abstract class ChunkTts implements TtsService {
 
     abstract readonly CHUNK_SIZE: number
+
+    audioProcessor: AudioProcessor;
+
+    constructor(audioProcessor: AudioProcessor) {
+        this.audioProcessor = audioProcessor;
+    }
 
     protected abstract sendRequest(content: Ssml): Promise<Buffer>
 
@@ -31,7 +62,7 @@ export abstract class ChunkTts implements TtsService {
         });
 
         let audio = parts.reduce((result, current) => {
-            return Wav.join(result, current);
+            return this.audioProcessor.join(result, current);
         });
 
         return audio;
@@ -42,16 +73,18 @@ export abstract class ChunkTts implements TtsService {
     }
 }
 
-export class TtsPool implements TtsService {
+export class TtsPool<T extends TtsService > implements TtsService {
 
     protected chunkSize?: number = null;
 
-    protected pool: TtsService[];
+    protected pool: T[];
 
     protected used: number[] = [];
+    audioProcessor: AudioProcessor;
 
-    constructor(...pool: TtsService[]) {
+    constructor(...pool: T[]) {
         this.pool = pool;
+        this.audioProcessor = pool[0].audioProcessor;
         this.used = pool.map(_ => 0);
     }
 
@@ -68,13 +101,13 @@ export class TtsPool implements TtsService {
         }));
         
         let audio = parts.reduce((result, current) => {
-            return Wav.join(result, current);
+            return this.audioProcessor.join(result, current);
         });
 
         return audio;
     }
 
-    private resolveService(): TtsService {
+    private resolveService(): T {
         let max = this.used.reduce((max, current) => max < current ? current : max);
         let found = this.used.find((usage) => usage < max);
         if (found === undefined) {
