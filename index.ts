@@ -11,6 +11,7 @@ import { HnManhDungDocBao, HnNgocHuyen, VbeeTts } from './lib/tts-services/vbee-
 import { RandomProxyRotation } from './lib/proxy_rotation';
 import { BuyProxies } from './lib/proxy-services/buyproxies';
 import { NamHN, NuHN, ZaloTts } from './lib/tts-services/zalo';
+import { Vpnt, BooksNamSG, BooksNuSG } from './lib/tts-services/vnpt';
 
 const config = dotenv.config().parsed;
 
@@ -18,7 +19,8 @@ const config = dotenv.config().parsed;
 
     // let buyProxies = new BuyProxies(config.BUY_PROXIES_PID, config.BUY_PROXIES_KEY);
     // let proxies = await buyProxies.proxies();
-    let tts = MsTts.factory(config.MS_TTS_KEY, config.MS_TTS_REGION);
+    // let tts = MsTts.factory(config.MS_TTS_KEY, config.MS_TTS_REGION);
+    let tts = new Vpnt(config.VPNT_ACCESS_TOKEN, config.VPNT_TOKEN_ID, config.VPNT_TOKEN_KEY)
     // let tts = new VbeeTts(new RandomProxyRotation(proxies));
     // let tts = new ZaloTts(config.ZALO_KEY);
 
@@ -33,7 +35,7 @@ const config = dotenv.config().parsed;
     // const downloader: Downloader = new TruyenFull('https://truyenfull.vn/the-gioi-hoan-my');
     const downloader: Downloader = new TruyenFull('https://truyenfull.vn/dau-la-dai-luc-230420');
     const copyright = Copyright.loadFromFile('copyright.txt');
-    const autoturn = new Autoturn(NuHN, NamHN);
+    const autoturn = new Autoturn(BooksNamSG, BooksNuSG);
     // const autoturn = new Autoturn(HnNgocHuyen, HnManhDungDocBao);
     // const autoturner = new Autoturn(GVoices.WavenetA, GVoices.WavenetD);
     const outro = Copyright.loadFromFile('outro.txt');
@@ -73,5 +75,5 @@ const config = dotenv.config().parsed;
         }
     }
 
-    processChapter(421, i => i < 421);
+    processChapter(422, i => i < 422);
 })()

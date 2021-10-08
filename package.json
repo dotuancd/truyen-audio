@@ -2,11 +2,11 @@
     "description": "Doc truyen bang audio",
     "dependencies": {
         "@google-cloud/text-to-speech": "^3.2.5",
-        "axios": "0.21.1",
+        "axios": "^0.21.4",
         "cheerio": "1.0.0-rc.10",
         "dotenv": "10.0.0",
-        "tunnel": "^0.0.6",
-        "microsoft-cognitiveservices-speech-sdk": "1.17.0"
+        "microsoft-cognitiveservices-speech-sdk": "1.17.0",
+        "tunnel": "^0.0.6"
     },
     "scripts": {
         "now": "ts-node index.ts",

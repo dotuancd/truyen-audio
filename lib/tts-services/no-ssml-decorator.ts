@@ -10,7 +10,7 @@ export interface NoSsmlTts {
 export class NoSsmlDecorator implements TtsService {
 
     private service: NoSsmlTts;
-    private audioProcessor: AudioProcessor;
+    audioProcessor: AudioProcessor;
 
     constructor(service: NoSsmlTts, audioProcessor: AudioProcessor) {
         this.service = service;

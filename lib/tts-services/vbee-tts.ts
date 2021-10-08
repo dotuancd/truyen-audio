@@ -1,17 +1,8 @@
 import axios from "axios";
-import { timeStamp } from "console";
-import { createWriteStream, fstat, writeFileSync } from "fs";
-import { Agent } from "http";
-// import { Agent } from "https";
-import HttpsProxyAgent from "https-proxy-agent";
-import { OCSPCacheFetchErrorEvent } from "microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common/OCSPEvents";
-import { sequential } from "../async";
 import { Proxy, ProxyRotation } from "../proxy_rotation";
 import { Ssml, Voice, VoiceNode } from "../ssml";
-import { AudioProcessor, ChunkTts, Mp3Processor, TtsService } from "../tts";
+import { ChunkTts, Mp3Processor } from "../tts";
 import * as tunnel from 'tunnel'
-import { Str } from "../str";
-import { findSourceMap } from "module";
 import { NoSsmlDecorator, NoSsmlTts } from "./no-ssml-decorator";
 
 export const HnNgocHuyen: Voice = {
