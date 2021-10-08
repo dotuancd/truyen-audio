@@ -37,6 +37,12 @@ let tts = new VbeeTts(new RandomProxyRotation(proxies));
 let tts = new ZaloTts(config.ZALO_KEY);
 ```
 
+### VNPT TTS
+
+```js
+let tts = new Vpnt(config.VPNT_ACCESS_TOKEN, config.VPNT_TOKEN_ID, config.VPNT_TOKEN_KEY)
+```
+
 ### TTS POOL
 
 Create a pool of tts services. This helpful while you want to avoid limitation by using difference keys for a same tts services.
