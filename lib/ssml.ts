@@ -7,26 +7,28 @@ export interface Voice {
 export class VoiceNode {
     content: string;
     voice: Voice;
+    speed: number;
 
     get length() {
         return this.content.length;
     }
 
-    constructor(voice: Voice, content: string) {
+    constructor(voice: Voice, content: string, speed: number = 1) {
         this.voice = voice;
         this.content = content;
+        this.speed = speed;
     }
 
     toString() {
-        return `<voice name="${this.voice.code}">${this.content}</voice>`;
+        return `<voice name="${this.voice.code}"><prosody rate="${this.speed}">${this.content}</prosody></voice>`;
     }
 
     chunk(size: number): VoiceNode[] {
         if (this.length <= size) {
-            return [new VoiceNode(this.voice, this.content)];
+            return [new VoiceNode(this.voice, this.content, this.speed)];
         }
 
-        return Str.chunk(this.content, size).map(chunk => new VoiceNode(this.voice, chunk))
+        return Str.chunk(this.content, size).map(chunk => new VoiceNode(this.voice, chunk, this.speed))
     }
 }
 

@@ -4,10 +4,12 @@ export class Autoturn {
 
     normalVoice: Voice;
     quoteVoice: Voice;
+    speed: number;
 
-    constructor(normalVoice: Voice, quoteVoice: Voice) {
+    constructor(normalVoice: Voice, quoteVoice: Voice, speed: number = 1) {
         this.normalVoice = normalVoice;
         this.quoteVoice = quoteVoice;
+        this.speed = speed;
     }
 
     makeup(content: string): Ssml {
@@ -31,8 +33,8 @@ export class Autoturn {
             let quote = content.substring(openPos, closePos + 1);
             content = content.substring(closePos + 1);
 
-            result.voice(new SsmlVoice(this.normalVoice, normal.trim()));
-            result.voice(new SsmlVoice(this.quoteVoice, quote.trim()));
+            result.voice(new SsmlVoice(this.normalVoice, normal.trim(), this.speed));
+            result.voice(new SsmlVoice(this.quoteVoice, quote.trim(), this.speed));
         }
 
         return result;
